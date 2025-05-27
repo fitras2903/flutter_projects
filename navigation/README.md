@@ -126,7 +126,7 @@ Scaffold, AppBar, ListView.builder, ListTile
 
 **Fitur Navigasi**
 
-Navigasi terjadi melalui callback onItemSelected() yang mengubah state _selectedItem
+Navigasi terjadi melalui callback onItemSelected() yang memanggil fungsi _selectItem(item) untuk mengubah state _selectedItem. Perubahan state ini menyebabkan DetailScreen ditambahkan ke dalam list pages.
 
 **2. DetailScreen**
 
@@ -142,7 +142,7 @@ Scaffold, AppBar, column, text, elevatedbutton
 
 **Fitur Navigasi**
 
-Menggunakan callback onBack() untuk kembali dengan mengubah state menjadi null
+Terdapat tombol back yang memanggil callback onBack(), yang kemudian mengubah state _selectedItem = null. Ini menghapus DetailScreen dari list pages.
 
 ### Modifikasi Kode
 Dilakukan penambahan field 'tugasPrakPBM' yang kemudian ditampilkan baik pada homescreen maupun detailscreen.
@@ -173,10 +173,32 @@ class Item {
 - Menambahkan tugasPrakPBM pada isi list
 - Menambahkan dan memanggil variabel tugasPrakPBM pada Children di HomeScreen dan DetailScreen
 
-## 3️⃣. Nested Navigatio
+### Alur Navigasi
+1. Aplikasi dijalankan → `MyApp` menginisialisasi `MyRouterDelegate` dan `MyRouteInformationParser`
+2. `MyRouterDelegate` membaca state `_selectedItem`
+3. Jika `_selectedItem == null`, hanya `HomeScreen` dimunculkan
+4. Jika user memilih item:
+   - Fungsi `onItemTapped(item)` → `_selectItem(item)` → set state `_selectedItem = item`
+   - `notifyListeners()` memicu `Navigator` rebuild dengan menambahkan `DetailScreen`
+5. Jika user tekan tombol "Kembali":
+   - `onBack()` → set `_selectedItem = null`
+   - `DetailScreen` dikeluarkan dari stack
+
+## 3️⃣. Nested Navigation
 ### Deskripsi Aplikasi 
+Aplikasi yang terdapat navigasi bersarang didalamnya. Ini berguna untuk membuat jalur tertentu yang mengarahkan pengguna ke halamannya masing-masing.
 
 ### Screenshot dan Penjelasan
+**1. HomeScreen**
+
+![image](https://github.com/user-attachments/assets/77e0d221-fa74-4407-99cc-d1965415f800)
+
+**Widget Utama**
+
+Scaffold, AppBar, column, text, elevatedbutton
+
+**Fitur Navigasi**
+Navigasi terjadi melalui ElevatedButton dengan navigator push yang mengarahkan ke SetupFlowScreen
 
 ### Modifikasi Kode
 
