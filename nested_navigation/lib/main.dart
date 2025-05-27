@@ -14,9 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(fontSize: 16),
-        ),
+        textTheme: const TextTheme(bodyMedium: TextStyle(fontSize: 16)),
       ),
       home: const HomeScreen(),
     );
@@ -30,10 +28,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Home'), centerTitle: true),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -47,11 +42,16 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SetupFlowScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const SetupFlowScreen(),
+                  ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
                 textStyle: const TextStyle(fontSize: 16),
               ),
               child: const Text('Start Setup Flow'),
@@ -107,10 +107,17 @@ class _SetupFlowScreenState extends State<SetupFlowScreen> {
               page = FindDevicesScreen(onDeviceFound: _onDeviceFound);
               break;
             case 'connect_device':
-              page = ConnectDeviceScreen(onSetupComplete: () => _completeSetup(context));
+              page = ConnectDeviceScreen(
+                onSetupComplete: () {
+                  _navigatorKey.currentState!.pushNamed('confirm_device');
+                },
+              );
+              break;
+            case 'confirm_device':
+              page = ConfirmDeviceScreen(onDone: () => _completeSetup(context));
               break;
             default:
-              page = FindDevicesScreen(onDeviceFound: _onDeviceFound);
+              page = const Center(child: Text('Unknown Route'));
           }
           return MaterialPageRoute(builder: (_) => page);
         },
@@ -187,6 +194,45 @@ class ConnectDeviceScreen extends StatelessWidget {
             child: const Text('Back'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Konfirmasi Device
+class ConfirmDeviceScreen extends StatelessWidget {
+  final VoidCallback onDone;
+  const ConfirmDeviceScreen({super.key, required this.onDone});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Confirm Device',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(onPressed: onDone, child: const Text('Done')),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
+                textStyle: const TextStyle(fontSize: 16),
+              ),
+              child: const Text('Back'),
+            ),
+          ],
+        ),
       ),
     );
   }

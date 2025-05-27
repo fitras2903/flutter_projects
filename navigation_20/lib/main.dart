@@ -8,8 +8,13 @@ void main() {
 class Item {
   final int id;
   final String name;
+  final String tugasPrakPBM; // New field
 
-  Item({required this.id, required this.name});
+  Item({
+    required this.id,
+    required this.name,
+    required this.tugasPrakPBM, // Add to constructor
+  });
 }
 
 // Aplikasi utama
@@ -26,9 +31,9 @@ class _MyAppState extends State<MyApp> {
 
   // Daftar item contoh
   final List<Item> _items = [
-    Item(id: 1, name: 'Item 1'),
-    Item(id: 2, name: 'Item 2'),
-    Item(id: 3, name: 'Item 3'),
+    Item(id: 1, name: 'Item 1', tugasPrakPBM: 'Tugas 1'),
+    Item(id: 2, name: 'Item 2', tugasPrakPBM: 'Tugas 2'),
+    Item(id: 3, name: 'Item 3', tugasPrakPBM: 'Tugas 3'),
   ];
 
   // Fungsi untuk menangani pemilihan item
@@ -52,9 +57,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primarySwatch: Colors.teal,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(fontSize: 16),
-        ),
+        textTheme: const TextTheme(bodyMedium: TextStyle(fontSize: 16)),
       ),
       home: Navigator(
         // Daftar pages didefinisikan secara deklaratif
@@ -62,10 +65,7 @@ class _MyAppState extends State<MyApp> {
           // Selalu tampilkan HomeScreen
           MaterialPage(
             key: const ValueKey('HomeScreen'),
-            child: HomeScreen(
-              items: _items,
-              onItemSelected: _selectItem,
-            ),
+            child: HomeScreen(items: _items, onItemSelected: _selectItem),
           ),
           // Tampilkan DetailScreen jika ada item yang dipilih
           if (_selectedItem != null)
@@ -103,17 +103,20 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Home'), centerTitle: true),
       body: ListView.builder(
         itemCount: items.length,
         itemBuilder: (context, index) {
           final item = items[index];
           return ListTile(
             title: Text(item.name),
-            subtitle: Text('ID: ${item.id}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('ID: ${item.id}'),
+                Text('Tugas Prak PBM: ${item.tugasPrakPBM}'),
+              ],
+            ),
             onTap: () => onItemSelected(item),
             trailing: const Icon(Icons.arrow_forward),
           );
@@ -128,19 +131,12 @@ class DetailScreen extends StatelessWidget {
   final Item item;
   final VoidCallback onBack;
 
-  const DetailScreen({
-    super.key,
-    required this.item,
-    required this.onBack,
-  });
+  const DetailScreen({super.key, required this.item, required this.onBack});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Detail: ${item.name}'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('Detail: ${item.name}'), centerTitle: true),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -149,15 +145,19 @@ class DetailScreen extends StatelessWidget {
               'Item: ${item.name}',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
+            Text('ID: ${item.id}', style: const TextStyle(fontSize: 16)),
             Text(
-              'ID: ${item.id}',
+              'Tugas Prak PBM: ${item.tugasPrakPBM}',
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: onBack,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
                 textStyle: const TextStyle(fontSize: 16),
               ),
               child: const Text('Back to Home'),
