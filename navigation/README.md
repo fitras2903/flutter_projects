@@ -191,21 +191,302 @@ Aplikasi yang terdapat navigasi bersarang didalamnya. Ini berguna untuk membuat 
 ### Screenshot dan Penjelasan
 **1. HomeScreen**
 
-![image](https://github.com/user-attachments/assets/77e0d221-fa74-4407-99cc-d1965415f800)
+Menampilkan tombol "Start Setup" untuk memulai alur setup.
 
-**Widget Utama**
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/77e0d221-fa74-4407-99cc-d1965415f800" width="45%" />
+</p>
 
-Scaffold, AppBar, column, text, elevatedbutton
+**Widget Utama**  
+`Scaffold`, `AppBar`, `Column`, `Text`, `ElevatedButton`
 
-**Fitur Navigasi**
-Navigasi terjadi melalui ElevatedButton dengan navigator push yang mengarahkan ke SetupFlowScreen
+**Fungsi Navigasi**
+
+```
+dart
+ElevatedButton(
+  onPressed: () {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const SetupFlowScreen()),
+    );
+  },
+  child: const Text('Start Setup'),
+)
+```
+
+**2. Setup Flow Screen**
+
+Berfungsi sebagai navigator untuk mengatur alur nestednya
+
+**Widget Utama**  
+Scaffold, AppBar, Navigator, GlobalKey, onGenerateRoute
+
+**Fungsi Navigasi**
+
+```
+Navigator(
+        key: _navigatorKey,
+        initialRoute: 'find_devices',
+        onGenerateRoute: (settings) {
+          Widget page;
+          switch (settings.name) {
+            case 'find_devices':
+              page = FindDevicesScreen(onDeviceFound: _onDeviceFound);
+              break;
+            case 'connect_device':
+              page = ConnectDeviceScreen(
+                onSetupComplete: () {
+                  _navigatorKey.currentState!.pushNamed('confirm_device');
+                },
+              );
+              break;
+            case 'confirm_device':
+              page = ConfirmDeviceScreen(onDone: () => _completeSetup(context));
+              break;
+            default:
+              page = const Center(child: Text('Unknown Route'));
+          }
+          return MaterialPageRoute(builder: (_) => page);
+        },
+      )
+```
+
+**3. Sub Layar 1-2**
+Layar Nested Navigation
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/02486c4e-d080-44b1-9806-66ddf49f15e0" width="45%" />
+  <img src="https://github.com/user-attachments/assets/1352464d-2756-4338-9899-e31b7e05c3ae" width="45%" />
+</p>
+
+
+**Widget Utama**  
+Scaffold, AppBar, Text, ElevatedButton
+
+**Fungsi Navigasi**
+Navigasi maju sub layar 1 ke sub layar 2
+```
+  void _onDeviceFound() {
+    _navigatorKey.currentState!.pushNamed('connect_device');
+  }
+```
+
+Navigasi kembali sub layar 2 ke sub layar 1
+```
+  void _completeSetup(BuildContext context) {
+    Navigator.pop(context); // Kembali ke HomeScreen
+  }
+```
 
 ### Modifikasi Kode
+Dilakukan penambahan sub layar ke-3 seperti gambar berikut
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6e9530ec-a2e1-4ad9-a563-66344cf714b9" width="45%" />
+</p>
+
+Kode sub layar ke-3
+
+```
+class ConfirmDeviceScreen extends StatelessWidget {
+  final VoidCallback onDone;
+  const ConfirmDeviceScreen({super.key, required this.onDone});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Confirm Device',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(onPressed: onDone, child: const Text('Done')),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
+                textStyle: const TextStyle(fontSize: 16),
+              ),
+              child: const Text('Back'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+Lalu penambahan rute navigator
+```
+Navigator(
+        key: _navigatorKey,
+        initialRoute: 'find_devices',
+        onGenerateRoute: (settings) {
+          Widget page;
+          switch (settings.name) {
+            case 'find_devices':
+              page = FindDevicesScreen(onDeviceFound: _onDeviceFound);
+              break;
+            case 'connect_device':
+              page = ConnectDeviceScreen(
+                onSetupComplete: () {
+                  _navigatorKey.currentState!.pushNamed('confirm_device');
+                },
+              );
+              break;
+            case 'confirm_device':
+              page = ConfirmDeviceScreen(onDone: () => _completeSetup(context));
+              break;
+            default:
+              page = const Center(child: Text('Unknown Route'));
+          }
+          return MaterialPageRoute(builder: (_) => page);
+        },
+      ),
+```
+
+Dan beberapa perubahan kecil lainnya.
+
+### Alur Navigasi
+1. Aplikasi dimulai dan menampilkan HomeScreen.
+2. User menekan tombol → Navigasi berpindah ke SetupFlowScreen.
+3. Navigator lokal memuat halaman / (Step1), dilanjut ke Step2, Step3, dan Confirm.
+4. Setelah menekan "Finish" di ConfirmScreen, user kembali ke HomeScreen menggunakan navigator root.
 
 ## 4️⃣ Deep Link Navigation
 ### Deskripsi Aplikasi
+Pada aplikasi ini, deep link digunakan untuk langsung membuka `DetailScreen` berdasarkan parameter yang dibaca dari URI.
 
 ### Screenshot dan Penjelasan
 
+**1. HomeScreen**
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e72ea1b4-29c1-460c-98cc-45d59e08672d" width="45%" />
+</p>
+
+**Widget Utama**
+
+Scaffold, AppBar, Column, ElevatedButton
+
+**Fitur Navigasi**
+
+Home screen menampilkan tombol untuk membuka `DetailScreen`
+
+```
+dart
+ElevatedButton(
+  onPressed: () {
+    Navigator.pushNamed(context, '/detail?id=123');
+  },
+  child: const Text('Go to Detail via Deep Link'),
+)
+```
+
+**2. DetailScreen**
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/87070988-74f1-4080-b96d-ca4607537e32" width="45%" />
+</p>
+
+**Widget Utama**
+
+Scaffold, AppBar, Text
+
+**Fitur Navigasi**
+
+Menampilkan detail item berdasarkan ID yang dipilih atau dari URI. Terdapat tombol untuk kembali ke halaman utama.
+
 ### Modifikasi Kode
+Dilakukan penambahan route settingg seperti gambar berikut:
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/df8d339b-99db-42a7-9c24-cb16b4cef143" width="45%" />
+  <img src="https://github.com/user-attachments/assets/0225b0a4-2eb9-4273-8d6f-f38044f44d8c" width="45%" />
+</p>
+
+- Layar setting
+```
+// Layar Settings (SettingsScreen)
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Settings'), centerTitle: true),
+      body: const Center(
+        child: Text(
+          'Halaman Settings',
+          style: TextStyle(fontSize: 20),
+        ),
+      ),
+    );
+  }
+}
+```
+
+- Penambahan icon setting pada appbar
+```
+      appBar: AppBar(
+        title: const Text('Home'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: onSettingsSelected,
+            tooltip: 'Settings',
+          ),
+        ],
+      ),
+```
+
+Penambahan variabel 
+```
+class HomeScreen extends StatelessWidget {
+  final List<Item> items;
+  final Function(int) onItemSelected;
+  final VoidCallback onSettingsSelected;
+
+  const HomeScreen({
+    super.key,
+    required this.items,
+    required this.onItemSelected,
+    required this.onSettingsSelected,
+  });
+```
+
+Penanganan rute setting
+```
+    if (uri.pathSegments.length == 1 && uri.pathSegments[0] == 'settings') {
+      return RoutePath.settings();
+    }
+```
+```
+  RouteInformation restoreRouteInformation(RoutePath path) {
+    if (path.isHome) {
+      return RouteInformation(uri: Uri.parse('/'));
+    }
+    if (path.isDetail) {
+      return RouteInformation(uri: Uri.parse('/detail/${path.id}'));
+    }
+    if (path.isSettings) {
+      return RouteInformation(uri: Uri.parse('/settings'));
+    }
+    return RouteInformation(uri: Uri.parse('/'));
+  }
+```
+
+Lalu ada penambahan kelas konfigurasi rute dan perubahan-perubahan kecil lainnya.
 
